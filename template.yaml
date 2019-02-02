@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    lambda_layer_demo
+
+    Sample SAM Template for lambda_layer_demo
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 60
+
+
+Resources:
+
+    DeserializeDemoFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            FunctionName: LayerApp-deserialize-demo
+            Description: This function is for deserialize demo
+            CodeUri: deserialize-demo/
+            Handler: main.lambda_handler
+            Runtime: python3.7
+            Role: arn:aws:iam::752369343347:role/service-role/LayerDemoRole
+            Layers:
+                - !Ref MyLambdaLayer
+           
+    ObjectpathDataDemoFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: LayerApp-objectpath-data-demo
+            Description: This function is for objectpath-data-demo
+            CodeUri: objectpath-data-demo/
+            Handler: main.lambda_handler
+            Runtime: python3.7
+            Role: arn:aws:iam::752369343347:role/service-role/LayerDemoRole
+            Layers:
+                - !Ref MyLambdaLayer
+
+    MyLambdaLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: MyLambdaLayer
+            Description: This layer include objectpath dependency and json data
+            ContentUri: lambda-layers/my-lambda-layer.zip
+            CompatibleRuntimes:
+                - python3.6
+                - python3.7
+            LicenseInfo: MIT
+            RetentionPolicy: Retain
+
+Outputs:
+
+    MyLambdaLayerARN:
+        Value: !Ref MyLambdaLayer
+        Description: ARN of MyLambdaLayer function
+        Export:
+            Name: mylambda-layer-arn
